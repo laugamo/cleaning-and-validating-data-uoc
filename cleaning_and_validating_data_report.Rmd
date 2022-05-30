@@ -1,0 +1,49 @@
+---
+title: 'Tipologia i cicle de vida de les dades: PRACTICA2'
+author: "Autor: Oriol Toll i Laura Gassó"
+date: "May 2022"
+output:
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    includes:
+      in_header: 05.584-PAC-header.html
+  word_document: default
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*****
+# Introducció
+*****
+
+*****
+# Resolució
+*****
+
+## Descripció del dataset
+
+
+## Integració i selecció de les dades d’interès a analitzar
+
+## Neteja de les dades.
+
+## Anàlisi de les dades.
+
+### Selecció dels grups de dades que es volen analitzar/comparar
+
+### Comprovació de la normalitat i homogeneïtat de la variància.
+
+### Aplicació de proves estadístiques per comparar els grups de dades
+
+## Representació dels resultats a partir de taules i gràfiques
+
+##  Resolució del problema
