@@ -31,8 +31,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Descripció del dataset
 
+Dades del Titanic
 
 ## Integració i selecció de les dades d’interès a analitzar
+
 
 ## Neteja de les dades.
 
