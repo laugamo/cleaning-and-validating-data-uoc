@@ -25,18 +25,124 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introducció
 *****
 
+Aquest projecte pretén posar en pràctica les activitats que es duen a terme en les fases inicials d'un projecte de mineria de dades. Aquestes tenen com a objectiu obtenir un domini de les dades amb les que es construirà el model de mineria. És vital coneixer profundament les dades tant en el seu format com contingut. Tasques típiques poden ser la selecció de característiques o variables, la preparació del joc de dades per a posteriorment ser consumit per un algorisme (tractament de valors nuls i outliers, transformacions, codificació de les variables categòriques, etc) i intentar extreure el màxim coneixement possible de les dades.
+
+Per a la resolució d'aquest projecte es farà ús del dataset de **Titànic** obtingut de la pàgina de kaggle: https://www.kaggle.com/competitions/titanic/data
+
 *****
 # Resolució
 *****
 
-## Descripció del dataset
+S'instal·len i es carreguen les llibreries
+
+```{r setup libraries, include=FALSE,  message=FALSE, warning=FALSE}
+# Set libraries
+library(data.table)
+library(ggplot2)
+library(tidyr)
+# https://cran.r-project.org/web/packages/arules/index.html
+if (!require('arules')) install.packages('arules'); library('arules')
+
+```
+
+Es carreguen els fitxers de dades.
+
+```{r import data, echo=TRUE, message=FALSE, warning=FALSE}
+
+# Load data
+raw.train <- data.table::fread("./data/train.csv", dec = ".")
+raw.test <- data.table::fread("./data/test.csv", dec = ".")
+```
 
 
+## Exploració de les dades i descripció del dataset
 
+El dataset Titànic representa informació sobre els passatgers i la tripulació que anava en el Titànic en el moment del naufràgi. A partir de l'anàlisi dels supervivents i els morts en aquest accident, es poden compèndre els critèris i procediments d'evacuació que es van dur a terme en el moment del sinistre.
+
+s'uneix el joc de dades de train i test per tal de realitzar les tasques de neteja i processament.
+
+```{r , echo=TRUE, message=FALSE, warning=FALSE}
+# Get full dataset
+
+# Check if any label on training is missing
+if(sum(is.na(raw.train$Survived)) == 0) {
+
+  # Join train and test set  
+  test <- raw.test[, Survived := NA]
+  total.data <- rbind(raw.train, test)
+} else {
+  print('There are some missing values in dependant variable on training data set')
+}
+
+```
+
+Es verifica l'estructura del joc de dades principal.
+
+```{r}
+str(total.data)
+```
+
+S'observa que es tenen 1309 registres que corresponen als viatgers i tripulació del Titànic i 11 variables que els caracteritzen.
+
+Es revisa la descripció de les variables contingudes al fitxer i si els tipus de variable es correspon al que s'ha carregat:
+
+
+**PassengerId**
+    integer with the id of the row (one for each passenger)
+    
+**Survived**
+    a factor with two levels (no and yes) specifying whether the person has survived the sinking.
+
+**Pclass**
+    factor specifying the class for passengers or the type of service aboard for crew members.
+    
+**Name**
+    string with the name of the passenger.
+    
+**Sex**
+    factor with levels male and female.
+    
+**Age**
+    numeric value with the persons age on the day of the sinking. The age of babies (under 12 months) is given as a fraction of one year (1/month).
+    
+ **SibSp**
+    ordered factor specifying the number if siblings/spouses aboard; adopted from Vanderbild data set.
+
+**Parch**
+    an ordered factor specifying the number of parents/children aboard; adopted from Vanderbild data set.
+
+**Ticket**
+  string specifying the persons ticket number (NA for crew members).
+
+**Fare**
+    numeric value with the ticket price (NA for crew members, musicians and employees of the shipyard company).
+
+**Cabin**
+    string specifying the persons cabin
+    
+**Embarked**
+    factor with the persons place of embarkment.
+
+
+Es treuen les estadístiques bàsiques.
+
+```{r , echo=TRUE, message=FALSE, warning=FALSE}
+# Get data summary 
+summary(total.data)
+```
+
+ 
 ## Integració i selecció de les dades d’interès a analitzar
 
 
 ## Neteja de les dades.
+
+Estadístiques de valors buits.
+
+```{r}
+colSums(is.na(totalData))
+colSums(totalData=="")
+```
 
 ## Anàlisi de les dades.
 
@@ -49,3 +155,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Representació dels resultats a partir de taules i gràfiques
 
 ##  Resolució del problema
+
+
+
