@@ -35,14 +35,17 @@ Per a la resolució d'aquest projecte es farà ús del dataset de **Titànic** o
 
 S'instal·len i es carreguen les llibreries
 
-```{r setup libraries, include=FALSE,  message=FALSE, warning=FALSE}
+```{r setup libraries, include=TRUE,  message=FALSE, warning=FALSE}
 # Set libraries
 library(data.table)
-library(ggplot2)
 library(tidyr)
 # https://cran.r-project.org/web/packages/arules/index.html
 if (!require('arules')) install.packages('arules'); library('arules')
-
+# https://cran.r-project.org/web/packages/ggplot2/index.html
+if (!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
+# https://cran.r-project.org/web/packages/dplyr/index.html
+if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
+if (!require("DT")) install.packages('DT'); library('DT')
 ```
 
 Es carreguen els fitxers de dades.
@@ -59,7 +62,7 @@ raw.test <- data.table::fread("./data/test.csv", dec = ".")
 
 El dataset Titànic representa informació sobre els passatgers i la tripulació que anava en el Titànic en el moment del naufràgi. A partir de l'anàlisi dels supervivents i els morts en aquest accident, es poden compèndre els critèris i procediments d'evacuació que es van dur a terme en el moment del sinistre.
 
-s'uneix el joc de dades de train i test per tal de realitzar les tasques de neteja i processament.
+S'uneix el joc de dades de train i test per tal de realitzar les tasques de neteja i processament.
 
 ```{r , echo=TRUE, message=FALSE, warning=FALSE}
 # Get full dataset
@@ -140,9 +143,23 @@ summary(total.data)
 Estadístiques de valors buits.
 
 ```{r}
-colSums(is.na(totalData))
-colSums(totalData=="")
+colSums(is.na(total.data))
+
+colSums(total.data=="")
 ```
+
+Assignem valor "Desconegut" per als valors buits de la variable "country".
+
+```{r}
+#total.data$country[is.na(total.data$country)] <- "Desconegut"
+```
+
+Assignem la mitjana per a valors buits de la variable "age".
+
+```{r}
+total.data$age[is.na(total.data$age)] <- mean(total.data$age,na.rm=T)
+```
+
 
 ## Anàlisi de les dades.
 
@@ -155,6 +172,22 @@ colSums(totalData=="")
 ## Representació dels resultats a partir de taules i gràfiques
 
 ##  Resolució del problema
+
+## Taula de contribucions
+
+
+```{r,  echo=FALSE, message=FALSE, warning=FALSE}
+contributions <- data.table::data.table(Contribucions = c('Investigació previa', 'Redacció  de les respostes', 'Desenvolupament del codi'),
+                                        Firma = rep(c('Oriol Toll, Laura Gassó'),3))
+
+DT::datatable(contributions)
+```
+
+
+
+
+
+
 
 
 
