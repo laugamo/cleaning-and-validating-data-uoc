@@ -46,21 +46,24 @@ if (!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
 # https://cran.r-project.org/web/packages/dplyr/index.html
 if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
 if (!require("DT")) install.packages('DT'); library('DT')
+if (!require("nortest")) install.packages('nortest'); library('nortest')
 ```
 
 Es carreguen els fitxers de dades.
 
 ```{r import data, echo=TRUE, message=FALSE, warning=FALSE}
-
 # Load data
 raw.train <- data.table::fread("./data/train.csv", dec = ".")
 raw.test <- data.table::fread("./data/test.csv", dec = ".")
 ```
 
-
-## Exploració de les dades i descripció del dataset
+## Quina pregunta/problema es pot respondre amb el dataset Titànic?
 
 El dataset Titànic representa informació sobre els passatgers i la tripulació que anava en el Titànic en el moment del naufràgi. A partir de l'anàlisi dels supervivents i els morts en aquest accident, es poden compèndre els critèris i procediments d'evacuació que es van dur a terme en el moment del sinistre.
+
+També es pot utilizar el dataset per tal de crear un algoritme de classificació que ajudia a predir la probabilitat de salvar-se d'un passatger.
+
+## Exploració de les dades i descripció del dataset
 
 S'uneix el joc de dades de train i test per tal de realitzar les tasques de neteja i processament.
 
@@ -127,51 +130,192 @@ Es revisa la descripció de les variables contingudes al fitxer i si els tipus d
     factor with the persons place of embarkment.
 
 
+Es canvien a factor les columnes necessaries.
+
+```{r , echo=TRUE, message=FALSE, warning=FALSE}
+changeCols <- c('Survived', 'Pclass', 'Sex', 'SibSp', 'Parch')
+total.data[,(changeCols):= lapply(.SD, as.factor), .SDcols = changeCols]
+```
+
 Es treuen les estadístiques bàsiques.
 
 ```{r , echo=TRUE, message=FALSE, warning=FALSE}
 # Get data summary 
 summary(total.data)
 ```
-
+ S'observa que els passatgers eren molt joves donat que la mitjana d'edat és 29.88.
  
 ## Integració i selecció de les dades d’interès a analitzar
 
+Les dades que s'utlitzaran són les que anteriorment s'han ajuntat del data de *test* i el de *train.* Tot i això, no s'estudiaran ni tractaran totes les variables, donat que variables com **PassengerID**, **Name**, **Cabin** o **Ticket**, ens aporten informació que no serà de cap utilitat per resoldre el problema incial.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.data <- total.data[,.(Survived, Pclass, Sex, Age, SibSp, Parch, Fare, Embarked)]
+```
 
 ## Neteja de les dades.
 
 Estadístiques de valors buits.
 
-```{r}
-colSums(is.na(total.data))
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+colSums(is.na(work.data))
 
-colSums(total.data=="")
+colSums(work.data=="")
 ```
 
-Assignem valor "Desconegut" per als valors buits de la variable "country".
+Assignem la mitjana per a valors buits de la variable **Age**.
 
-```{r}
-#total.data$country[is.na(total.data$country)] <- "Desconegut"
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.data$Age[is.na(work.data$Age)] <- mean(work.data$Age,na.rm=T)
 ```
 
-Assignem la mitjana per a valors buits de la variable "age".
+Assignem un valor de **0** al valor buit de la variable **Fare**, ja que correspon al preu del tiquet d'un membre de la tripulació.
 
-```{r}
-total.data$age[is.na(total.data$age)] <- mean(total.data$age,na.rm=T)
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.data$Fare[is.na(work.data$Fare)] <- 0
 ```
 
+Assignem valor **Desconegut** per a valors buits de la variable **Embarked**.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.data$Embarked[(work.data$Embarked == "")] <- "Desconegut"
+```
 
 ## Anàlisi de les dades.
 
-### Selecció dels grups de dades que es volen analitzar/comparar
+Per començar, es farà una representació gràfica per les variables que es volen analitzar, d'aquesta manera, es podrà tenir una idea principal de com es comporten totes elles: 
 
-### Comprovació de la normalitat i homogeneïtat de la variància.
 
-### Aplicació de proves estadístiques per comparar els grups de dades
+### Visualització dades numèriques
 
-## Representació dels resultats a partir de taules i gràfiques
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.data$Fare_log <- -log(work.data$Fare)
 
-##  Resolució del problema
+meltData <- melt(work.data[, .(Age, Fare, Fare_log)])
+p <- ggplot(meltData, aes(factor(variable), value)) 
+p + geom_boxplot() + facet_wrap(~variable, scale="free")
+```
+
+En el boxplot sense transformar de la variable Fare, no es pot apreciar res a causa de les observacions amb
+valors elevats. Es procedeix per tant a aplicar el logaritme a la variable per tal de poder visualitzar millor els resultats.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+hist(work.data$Age)
+hist(work.data$Fare)
+```
+
+A partir de l'histograma s'observa com cap de les variables numèriques tenen una distribució normal.
+En les dos apareix una cua llarga a la dreta.
+
+
+### Visualització dades categòriques
+
+* *Survived:*
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+qplot(work.data$Survived,
+      geom="bar",
+      xlab = "Survived")
+```
+
+* *Pclass:*
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+qplot(work.data$Pclass,
+      geom="bar",
+      xlab = "Pclass")
+```
+
+* *Sex:*
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+qplot(work.data$Sex,
+      geom="bar",
+      xlab = "Sex")
+```
+
+* *Embarked:*
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+qplot(work.data$Embarked,
+      geom="bar",
+      xlab = "Embarked")
+```
+
+
+* *SibSp:*
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+qplot(work.data$SibSp,
+      geom="bar",
+      xlab = "SibSp")
+```
+
+* *Parch:*
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+qplot(work.data$Parch,
+      geom="bar",
+      xlab = "Parch")
+```
+
+
+### Selecció dels grups de dades que es volen analitzar/comparar 
+
+Un cop netejat el dataset, es torna a dividir en train i test per tal de realitzar els anàlisis.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.train <- work.data[!is.na(Survived)]
+work.test <- work.data[is.na(Survived)]
+```
+
+A partir d'aqui es procedeix a anàlitzar si els factors classe i genere són rellevants per a la supervivència.
+
+Es procedeix a analitzar les relacions entre les diferents variables del joc de dades per veure si es relacionen i com.
+
+Es visualitza la relació entre les variables "sex" i "survived":
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(work.train) +
+   geom_bar(aes(Sex, fill = Survived), position = "fill") +
+   ggtitle("Relació entre les variables sex i survived")
+```
+
+Es visualitza la relació entre les variables "pclass" i "survived":
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(work.train) +
+   geom_bar(aes(Pclass, fill = Survived), position = "fill") +
+   ggtitle("Relació entre les variables class i survived")
+```
+
+Tal i com es pot observar ene els gràfics si que sembla que hi hagi una correlació entre la classe o el genere i el fet de sobreviure. A priori sembla que les dones i les classes altes tenen un rati de supervivència més elevat.
+
+### Comprovació de la normalitat i homogeneïtat de la variància. **[Proves sobre les 7 variables d'estudi, si no són normals, les normalitzem?]**
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# #Gràfics
+# par(mfrow=c(1,3))
+# hist(work.train$Age) # histograma
+# qqnorm(work.train$Age) # gràfic quantile
+# qqline(work.train$Age)
+# #costrast normalitat
+# nortest::lillie.test(work.train$Age) #contrast
+```
+
+### Aplicació de proves estadístiques per comparar els grups de dades **[Proves amb el raw.train sobre Survived]**
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+```
+
+
+## Resolució del problema **[Model de regresio amb les conclusions anteriors?]**
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+```
+
 
 ## Taula de contribucions
 
