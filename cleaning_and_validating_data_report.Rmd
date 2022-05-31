@@ -133,45 +133,87 @@ Es treuen les estadístiques bàsiques.
 # Get data summary 
 summary(total.data)
 ```
-
  
 ## Integració i selecció de les dades d’interès a analitzar
 
+Les dades que s'utlitzaran són les que anteriorment s'han ajuntat del data de *test* i el de *train.* Tot i això, no s'estudiaran ni tractaran totes les variables, donat que variables com **PassengerID**, **Name**, **Cabin** o **Ticket**, ens aporten informació que no serà de cap utilitat per resoldre el problema inciial.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.data <- total.data[,-c(1, 4, 9, 11)]
+```
 
 ## Neteja de les dades.
 
 Estadístiques de valors buits.
 
-```{r}
-colSums(is.na(total.data))
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+colSums(is.na(work.data))
 
-colSums(total.data=="")
+colSums(work.data=="")
 ```
 
-Assignem valor "Desconegut" per als valors buits de la variable "country".
+Assignem la mitjana per a valors buits de la variable **Age**.
 
-```{r}
-#total.data$country[is.na(total.data$country)] <- "Desconegut"
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.data$Age[is.na(work.data$Age)] <- mean(work.data$Age,na.rm=T)
 ```
 
-Assignem la mitjana per a valors buits de la variable "age".
+Assignem un valor de **0** al valor buit de la variable **Fare**, ja que correspon al preu del tiquet d'un membre de la tripulació.
 
-```{r}
-total.data$age[is.na(total.data$age)] <- mean(total.data$age,na.rm=T)
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.data$Fare[is.na(work.data$Fare)] <- 0
 ```
 
+Assignem valor **Desconegut** per a valors buits de la variable **Embarked**.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+work.data$Embarked[(work.data$Embarked == "")] <- "Desconegut"
+```
 
 ## Anàlisi de les dades.
 
-### Selecció dels grups de dades que es volen analitzar/comparar
+Per començar, es farà una representació gràfica per les variables que es volen analitzar, d'aquesta manera, es podrà tenir una idea principal de com es comporten totes elles: **[Jo aqui faria un ggplot amb cada una d'elles amb un gràfic simple pero maco]**
 
-### Comprovació de la normalitat i homogeneïtat de la variància.
+* *Age:*
+* *SibSp:*
+* *Parch:*
+* *Fare:*
 
-### Aplicació de proves estadístiques per comparar els grups de dades
+* *Survived:*
+* *Pclass:*
+* *Sex:*
+* *Embarked:*
 
-## Representació dels resultats a partir de taules i gràfiques
+### Selecció dels grups de dades que es volen analitzar/comparar **[A la part de codi crec que no fa falta res, ja estan sepratas al principi les dades]**
 
-##  Resolució del problema
+Per començar a treballar amb les dades, es partirà de les taules de *train* i de *test*, cada una d'elles té la seva pròpia funcionalitat. Mentre que amb les dades de *train* s'utilitzaran per treballar i intentar resoldre el problema, les dades de *test* serviran per veure els resultats finals sobre aquells passatgers que no tenen informat el camp **Survived**.
+
+D'aquesta manera, treballant amb les dades es podrà observar si els diferents atributs de la taula, van influir o no en que els passatgers sobrevisquéssin en l'accident del Titànic. 
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+```
+
+### Comprovació de la normalitat i homogeneïtat de la variància. **[Proves sobre les 7 variables d'estudi, si no són normals, les normalitzem?]**
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+```
+
+### Aplicació de proves estadístiques per comparar els grups de dades **[Proves amb el raw.train sobre Survived]**
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+```
+
+## Representació dels resultats a partir de taules i gràfiques **[Aquest apartat està inclos en la resta]**
+
+## Resolució del problema **[Model de regresio amb les conclusions anteriors?]**
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+
+```
+
 
 ## Taula de contribucions
 
