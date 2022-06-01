@@ -157,7 +157,7 @@ work.data <- total.data[,.(Survived, Pclass, Sex, Age, SibSp, Parch, Fare, Embar
 
 ## Neteja de les dades.
 
-Estadístiques de valors buits.
+### Estadístiques de valors buits.
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 colSums(is.na(work.data))
@@ -182,6 +182,9 @@ Assignem valor **Desconegut** per a valors buits de la variable **Embarked**.
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 work.data$Embarked[(work.data$Embarked == "")] <- "Desconegut"
 ```
+
+### Estadístiques de valors extrems.
+
 
 ## Anàlisi de les dades.
 
@@ -314,7 +317,7 @@ Tal i com es pot observar ene els gràfics si que sembla que hi hagi una correla
 
 
 
-## Resolució del problema **[Model de regresio amb les conclusions anteriors?]**
+## Conclusions 
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 
