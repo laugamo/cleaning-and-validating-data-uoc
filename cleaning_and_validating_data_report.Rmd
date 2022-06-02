@@ -196,7 +196,13 @@ work.data$Fare_log <- -log(work.data$Fare)
 
 meltData <- melt(work.data[, .(Age, Fare, Fare_log)])
 p <- ggplot(meltData, aes(factor(variable), value)) 
-p + geom_boxplot() + facet_wrap(~variable, scale="free")
+p + geom_boxplot(fill="#ACD9D5", color = "#5AB4AC") + 
+  facet_wrap(~variable, scale="free") +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) + 
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks.y = element_line(colour = "black"))
 ```
 
 En el boxplot sense transformar de la variable Fare, no es pot apreciar res a causa de les observacions amb
@@ -211,8 +217,21 @@ print(extrems)
 
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-hist(work.data$Age)
-hist(work.data$Fare)
+plot <- ggplot(work.data, aes(x=work.data$Age)) 
+plot + geom_histogram(fill = "#ACD9D5", color = "#5AB4AC") + 
+  theme_minimal() +
+    theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black")) + 
+  labs(x = "Age", y = "Count")
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+plot <- ggplot(work.data, aes(x=work.data$Fare)) 
+plot + geom_histogram(fill = "#ACD9D5", color = "#5AB4AC") + 
+  theme_minimal() +
+    theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black")) + 
+  labs(x = "Fare", y = "Count")
 ```
 
 A partir de l'histograma s'observa que la variable *Fare* no segueix una distribució normal, però la vairbale *Age* s'haurà d'analitzar més endavant per comprobar-ho.
@@ -223,50 +242,68 @@ A partir de l'histograma s'observa que la variable *Fare* no segueix una distrib
 * *Survived:*
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-qplot(work.data$Survived,
-      geom="bar",
-      xlab = "Survived")
+ggplot(work.data, aes(x=work.data$Survived)) + 
+  geom_bar(xlab = "Survived", fill = "#ACD9D5", color = "#5AB4AC") + 
+  theme_minimal() +
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black")) + 
+  labs(x = "Survived", y = "Count")
 ```
 
 * *Pclass:*
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-qplot(work.data$Pclass,
-      geom="bar",
-      xlab = "Pclass")
+ggplot(work.data, aes(x=work.data$Pclass)) + 
+  geom_bar(xlab = "Pclass", fill = "#ACD9D5", color = "#5AB4AC") + 
+  theme_minimal() + 
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black")) + 
+  labs(x = "Class", y = "Count")
 ```
 
 * *Sex:*
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-qplot(work.data$Sex,
-      geom="bar",
-      xlab = "Sex")
+ggplot(work.data, aes(x=work.data$Sex)) + 
+  geom_bar(xlab = "Sex", fill = "#ACD9D5", color = "#5AB4AC") + 
+  theme_minimal() +
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black")) + 
+  labs(x = "Sex", y = "Count")
 ```
 
 * *Embarked:*
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-qplot(work.data$Embarked,
-      geom="bar",
-      xlab = "Embarked")
+ggplot(work.data, aes(x = factor(work.data$Embarked, level = c("C", "S", "Q", "Desconegut")))) + 
+  geom_bar(xlab = "Embarked", fill = "#ACD9D5", color = "#5AB4AC") + 
+  theme_minimal() +
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black")) + 
+  labs(x = "Embarked", y = "Count")
 ```
 
 
 * *SibSp:*
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-qplot(work.data$SibSp,
-      geom="bar",
-      xlab = "SibSp")
+ggplot(work.data, aes(x=work.data$SibSp)) + 
+  geom_bar(xlab = "SibSp", fill = "#ACD9D5", color = "#5AB4AC") + 
+  theme_minimal() + 
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black")) + 
+  labs(x = "Siblings/Spouses", y = "Count")
 ```
 
 * *Parch:*
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-qplot(work.data$Parch,
-      geom="bar",
-      xlab = "Parch")
+ggplot(work.data, aes(x=work.data$Parch)) + 
+  geom_bar(xlab = "Parch", fill = "#ACD9D5", color = "#5AB4AC") + 
+  theme_minimal() +
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black")) + 
+  labs(x = "Parents/Children", y = "Count")
 ```
 
 
@@ -286,25 +323,46 @@ Es procedeix a analitzar les relacions entre les diferents variables del joc de 
 Es visualitza la relació entre les variables *sex* i *survived*:
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-ggplot(work.train) +
-   geom_bar(aes(Sex, fill = Survived), position = "fill") +
-   ggtitle("Relació entre les variables sex i survived")
+ggplot(work.train) + 
+  geom_bar(aes(Sex, fill = Survived), position = "fill") + 
+  ggtitle("Relació entre les variables Sex i Survived") + 
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black"))  + 
+  scale_fill_manual(values = c("0" = "#ACD9D5", "1" = "#EAD093")) + 
+  scale_y_continuous(labels = c("0%", "25%", "50%", "75%", "100%"),
+                     breaks = c(0, 0.25, 0.50, 0.75, 1.00))
 ```
 
 Es visualitza la relació entre les variables *pclass* i *survived*:
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-ggplot(work.train) +
-   geom_bar(aes(Pclass, fill = Survived), position = "fill") +
-   ggtitle("Relació entre les variables class i survived")
+ggplot(work.train) + 
+  geom_bar(aes(Pclass, fill = Survived), position = "fill") + 
+  ggtitle("Relació entre les variables Class i Survived") + 
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black"))  + 
+  scale_fill_manual(values = c("0" = "#ACD9D5", "1" = "#EAD093")) + 
+  scale_y_continuous(labels = c("0%", "25%", "50%", "75%", "100%"),
+                     breaks = c(0, 0.25, 0.50, 0.75, 1.00))
 ```
 
 Es visualitza la relació entre la combinació de les variables *pclass* i *sex* amb la variable *survived*:
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-ggplot(work.train) +
-   geom_bar(aes(Sex, fill = Survived), position = "fill") + facet_wrap(~Pclass) +
-   ggtitle("Relació entre les variables class i survived")
+ggplot(work.train) + 
+  geom_bar(aes(Pclass, fill = Survived), position = "fill") + facet_wrap(~Sex) + 
+  ggtitle("Relació entre les variables Class i Sex Vs. Survived") + 
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) + 
+  theme(axis.line = element_line(colour = "black"), axis.text.y = element_text(hjust = 1),
+        axis.ticks = element_line(colour = "black"))  + 
+  scale_fill_manual(values = c("0" = "#ACD9D5", "1" = "#EAD093")) + 
+  scale_y_continuous(labels = c("0%", "25%", "50%", "75%", "100%"),
+                     breaks = c(0, 0.25, 0.50, 0.75, 1.00))
 ```
 
 
