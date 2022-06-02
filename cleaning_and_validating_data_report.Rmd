@@ -148,11 +148,10 @@ summary(total.data)
  
 ## Integració i selecció de les dades d’interès a analitzar
 
-Les dades que s'utlitzaran són les que anteriorment s'han ajuntat del data de *test* i el de *train.* Tot i això, no s'estudiaran ni tractaran totes les variables, donat que variables com **PassengerID**, **Name**, **Cabin** o **Ticket**, ens aporten informació que no serà de cap utilitat per resoldre el problema incial.
+Les dades que s'utlitzaran són les que anteriorment s'han ajuntat del data de **test** i el de **train.** Tot i això, no s'estudiaran ni tractaran totes les variables, donat que variables com *PassengerID*, *Name*, *Cabin* o *Ticket*, ens aporten informació que no serà de cap utilitat per resoldre el problema incial.
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 work.data <- total.data[,.(Survived, Pclass, Sex, Age, SibSp, Parch, Fare, Embarked)]
-
 ```
 
 ## Neteja de les dades.
@@ -165,25 +164,23 @@ colSums(is.na(work.data))
 colSums(work.data=="")
 ```
 
-Assignem la mitjana per a valors buits de la variable **Age**.
+Assignem la mitjana per a valors buits de la variable *Age*.
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 work.data$Age[is.na(work.data$Age)] <- mean(work.data$Age,na.rm=T)
 ```
 
-Assignem un valor de **0** al valor buit de la variable **Fare**, ja que correspon al preu del tiquet d'un membre de la tripulació.
+Assignem un valor de **0** al valor buit de la variable *Fare*, ja que correspon al preu del tiquet d'un membre de la tripulació.
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 work.data$Fare[is.na(work.data$Fare)] <- 0
 ```
 
-Assignem valor **Desconegut** per a valors buits de la variable **Embarked**.
+Assignem valor **Desconegut** per a valors buits de la variable *Embarked*.
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 work.data$Embarked[(work.data$Embarked == "")] <- "Desconegut"
 ```
-
-### Estadístiques de valors extrems.
 
 
 ## Anàlisi de les dades.
@@ -205,13 +202,20 @@ p + geom_boxplot() + facet_wrap(~variable, scale="free")
 En el boxplot sense transformar de la variable Fare, no es pot apreciar res a causa de les observacions amb
 valors elevats. Es procedeix per tant a aplicar el logaritme a la variable per tal de poder visualitzar millor els resultats.
 
+Pel que fa als valors extrems que es poden veure al gràfic, pertanyen a 4 passatgers amb un preu del tiquet de 512, molt més elevat que els de la resta, però com hem pogut comprobar, tots 4 pertanyen al grup de classe alta de l'embaració. Per tant, poden tranquilament pertnayer a valors reals del preu del bitllet i no es farà cap mena de tractament.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+extrems <- work.data[work.data$Fare==max(work.data$Fare)]
+print(extrems)
+```
+
+
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 hist(work.data$Age)
 hist(work.data$Fare)
 ```
 
-A partir de l'histograma s'observa com cap de les variables numèriques tenen una distribució normal.
-En les dos apareix una cua llarga a la dreta.
+A partir de l'histograma s'observa que la variable *Fare* no segueix una distribució normal, però la vairbale *Age* s'haurà d'analitzar més endavant per comprobar-ho.
 
 
 ### Visualització dades categòriques
@@ -277,9 +281,9 @@ work.test <- work.data[is.na(Survived)]
 
 A partir d'aqui es procedeix a anàlitzar si els factors classe i genere són rellevants per a la supervivència.
 
-Es procedeix a analitzar les relacions entre les diferents variables del joc de dades per veure si es relacionen i com.
+Es procedeix a analitzar les relacions entre les diferents variables del joc de dades per veure si es relacionen i com es comporten entre elles.
 
-Es visualitza la relació entre les variables "sex" i "survived":
+Es visualitza la relació entre les variables *sex* i *survived*:
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 ggplot(work.train) +
@@ -287,7 +291,7 @@ ggplot(work.train) +
    ggtitle("Relació entre les variables sex i survived")
 ```
 
-Es visualitza la relació entre les variables "pclass" i "survived":
+Es visualitza la relació entre les variables *pclass* i *survived*:
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 ggplot(work.train) +
@@ -295,29 +299,112 @@ ggplot(work.train) +
    ggtitle("Relació entre les variables class i survived")
 ```
 
-Tal i com es pot observar ene els gràfics si que sembla que hi hagi una correlació entre la classe o el genere i el fet de sobreviure. A priori sembla que les dones i les classes altes tenen un rati de supervivència més elevat.
+Es visualitza la relació entre la combinació de les variables *pclass* i *sex* amb la variable *survived*:
 
-### Comprovació de la normalitat i homogeneïtat de la variància. **[Proves sobre les 7 variables d'estudi, si no són normals, les normalitzem?]**
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(work.train) +
+   geom_bar(aes(Sex, fill = Survived), position = "fill") + facet_wrap(~Pclass) +
+   ggtitle("Relació entre les variables class i survived")
+```
+
+
+Tal i com es pot observar en els gràfics si que sembla que hi hagi una correlació entre la classe o el gènere i el fet de sobreviure. A priori sembla que les dones i les classes altes tenen un rati de supervivència més elevat.
+
+### Comprovació de la normalitat i homogeneïtat de la variància.
+
+* ***Age:***
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-# #Gràfics
-# par(mfrow=c(1,3))
-# hist(work.train$Age) # histograma
-# qqnorm(work.train$Age) # gràfic quantile
-# qqline(work.train$Age)
-# #costrast normalitat
-# nortest::lillie.test(work.train$Age) #contrast
+#Gràfics
+par(mfrow=c(1,2))
+hist(work.train$Age) # histograma
+qqnorm(work.train$Age) # gràfic quantile
+qqline(work.train$Age)
+#Contrast de normalitat
+shapiro.test(work.train$Age) #contrast
 ```
+
+Com es pot observar en els gràfics i en el contrast d'hipótesis, no podem afirmar amb un nivell de significació del 5% que aquesta variable segueix una distribució Normal, ja que el p_valor resultant és inferior a 0,05.
+
+* ***Fare:***
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+#Gràfics
+par(mfrow=c(1,2))
+hist(work.train$Fare) # histograma
+qqnorm(work.train$Fare) # gràfic quantile
+qqline(work.train$Fare)
+#Contrast de normalitat
+shapiro.test(work.train$Fare) #contrast
+```
+
+De la mateixa manera que amb *Age* i amb els gràfics que haviem vist anteriorment, no podem afirmar amb un nivell de significació del 5% que aquesta variable segueix una distribució Normal, ja que el p_valor resultant és inferior a 0,05.
 
 ### Aplicació de proves estadístiques per comparar els grups de dades **[Proves amb el raw.train sobre Survived]**
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE}
+#### Variables numériques Vs. Supervivéncia
 
+Com en el cas del nostre conjunt de dades, les variables numériques, no segueixen una Normal, s'haurà de fer proves no paramètriques per comparar diferents grups de dades, com per exemple la prova de Mann-Withney o la de Wilocxon.
+
+* La primera comparació que durem a terme, serà entre les variables *Age* i *Survived*
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Es pot fer un gràfic d'edat vs survived
+wilcox.test(Age ~ Survived, data = work.train)
 ```
 
+Gràcies al contrast d'hipótesis, no podem observar diferències estadístiques entre les persones que van sobreviure i les que no segons la seva edat.
 
+* La següent comparació serà entre les variables *Fare* i *Survived*
 
-## Conclusions 
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Es pot fer un gràfic de preu vs survived
+wilcox.test(Fare ~ Survived, data = work.train)
+```
+
+En aquest cas, gràcies al contrast d'hipótesis, sí que podem observar diferències estadístiques entre les persones que van sobreviure i les que no en funció del preu del seu bitllet.
+
+#### Variables discretes Vs. Supervivència
+
+En el cas de les comparacions entre dues variables categòriques, una d'elles amb dos grups, el que farem serà per cada una d'elles crear una taula de freqüències creuant les dues variables. I amb la taula resultant, fer una proba $\chi^2$ i veure si hi ha diferències estadístiques suficients per dir que els dos grups són diferents.
+
+* Comparació entre *Pclass* i *Survived*
+
+```{r, echo=TRUE, message=FALSE, warining=FALSE}
+chisq_classe <- table(work.train$Survived, work.train$Pclass)
+chisq.test(chisq_classe)
+```
+Com es veu en el resultat del test, p_valor inferior a 0,05, podem dir que hi ha diferències entre els supervivents i els morts segons la seva classe.
+
+* Comparació entre *Sex* i *Survived*
+
+```{r, echo=TRUE, message=FALSE, warining=FALSE}
+chisq_sexe <- table(work.train$Survived, work.train$Sex)
+chisq.test(chisq_sexe)
+```
+Com es veu en el resultat del test, p_valor inferior a 0,05, podem dir que hi ha diferències entre els supervivents i els morts segons el seu sexe.
+
+* Comparació entre *SibSp* i *Survived*
+
+Com que la variable *SibSp* consta de 7 categories, el contrast de la prova $\chi$ tindrà 6 graus de llibertat. Per tant, s'ha d'anar en compte a l'hora de llegir els resultats, ja que pot haver-hi errors d'aproximació en el test.
+
+```{r, echo=TRUE, message=FALSE, warining=FALSE}
+chisq_sibsp <- table(work.train$Survived, work.train$SibSp)
+chisq.test(chisq_sibsp)
+```
+Com es veu en el resultat del test, p_valor inferior a 0,05, podem dir que hi ha diferències entre els supervivents i els morts segons el nombre de germans o cònjugues amb els que van embarcar.
+
+* Comparació entre *Parch* i *Survived*
+
+Com que la variable *Parch* consta de 8 categories, el contrast de la prova $\chi$ tindrà 6 graus de llibertat. Per tant, s'ha d'anar en compte a l'hora de llegir els resultats, ja que pot haver-hi errors d'aproximació en el test.
+
+```{r, echo=TRUE, message=FALSE, warining=FALSE}
+chisq_parch <- table(work.train$Survived, work.train$Parch)
+chisq.test(chisq_parch)
+```
+Com es veu en el resultat del test, p_valor inferior a 0,05, podem dir que hi ha diferències entre els supervivents i els morts segons el nombre de pares o fills amb els que van embarcar.
+
+## Conclusions **[Explicació dels reusltats i amb l'explicació fer un model logístic de les variables que escollim per fer un model i preveure el work.test]**
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 
