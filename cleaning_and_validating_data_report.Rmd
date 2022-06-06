@@ -208,6 +208,9 @@ valors elevats. Es procedeix per tant a aplicar el logaritme a la variable per t
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
 hist(work.data$Age)
 hist(work.data$Fare)
+
+ggplot(work.data) +
+    geom_histogram(aes(x = Age), bins = 35)
 ```
 
 A partir de l'histograma s'observa com cap de les variables numèriques tenen una distribució normal.
