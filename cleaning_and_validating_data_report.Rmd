@@ -47,6 +47,7 @@ if (!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
 if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
 if (!require("DT")) install.packages('DT'); library('DT')
 if (!require("nortest")) install.packages('nortest'); library('nortest')
+if (!require("dplyr")) install.packages('dplyr'); library('dplyr')
 ```
 
 Es carreguen els fitxers de dades.
@@ -462,14 +463,65 @@ chisq.test(chisq_parch)
 ```
 Com es veu en el resultat del test, p_valor inferior a 0,05, podem dir que hi ha diferències entre els supervivents i els morts segons el nombre de pares o fills amb els que van embarcar.
 
-## Conclusions **[Explicació dels reusltats i amb l'explicació fer un model logístic de les variables que escollim per fer un model i preveure el work.test]**
+## Model
 
+Es procedeix a aplicar un GLM com a model de classificació per poder predir la probabilitat de supervivència.
 
+Es canvien a factor les columnes necessaries.
 
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE}
-
+```{r , echo=TRUE, message=FALSE, warning=FALSE}
+changeCols <- c('Survived')
+work.train[,(changeCols):= lapply(.SD, as.character), .SDcols = changeCols]
+work.train[,(changeCols):= lapply(.SD, as.numeric), .SDcols = changeCols]
 ```
+
+### Entrenant el model amb Edat i Sexe
+
+```{r, echo=TRUE, message=FALSE, warining=FALSE}
+work.train %>%
+   ggplot(aes(x = Age, y = Survived, color = Sex)) + 
+   geom_jitter(height = 0.05, alpha = 0.35) + 
+   geom_smooth(method="glm", method.args = list(family="binomial"))  + 
+   facet_wrap(~Sex) + 
+   labs(x = "Age", y = "Probability of survival")
+```
+El model de regressió logística entrenat confirma la tendència vista en el boxplots, les dones tènen una major probabilitat de supervivència que els homes.
+
+Interpretant les dades a partir de la variable sexe s'observa com el criteri de "nenes primer" sembla cert únicament per als homes.
+
+### Entrenant el model amb Edat, Sexe i Classe
+
+```{r, echo=TRUE, message=FALSE, warining=FALSE}
+work.train %>%
+   ggplot(aes(x = Age, y = Survived, color = Sex)) + 
+   geom_jitter(height = 0.05, alpha = 0.35) + 
+   geom_smooth(method="glm", method.args = list(family="binomial"))  + 
+   facet_grid(Pclass~Sex) +  
+   labs(x = "Age", y = "Probability of survival")
+```
+
+Al afegir la variable classe al model s'obté encara més informació sobre les dades i les conclusions anteriors poden canviar.
+
+- S'observa com les passatgeres femenines de primera classe sobreviuen gairebé totes i per tant l'edat no juga un paper important aqui (la relació entre edat i supervivència per a aquest grup és plana).
+
+- Les passetgeres de 2a classe té un comportament similar al de la 1a amb una lleugera disminució de la probabilitat de supervivència per a les passetgeres més grans.
+
+- Per a les passetgeres de 3a claase s'observa la regla de "els nens primer".
+
+- Per als passetgers masculins, el criteri "nens primer" sembla adaptar-se en totes les classes tot i que la probabilitat de supervivència és més alta com més lata és la classe.
+
+
+
+## Conclusions 
+
+- Les dades tenen una qualitat correcta i estan majoritàriament ben informades.
+- Disposen d'una variable de classe "survived" que les fa aptes per un classificador.
+- Es pot observar la joventut dels passatgers i la tripulació.
+- S'observa que una gran quantitat de persones viatjaven en família.
+- Les variables genere, classe i preu del bitllet estàn correlacionades amb la supervivència i són bones candidates per utilitzar-se al model classificador.
+- Les dones i els nens tenen una major probabilitat de salvar-se.
+- Un augment de la classe social implica tenir més probabilitats de salvar-se.
+
 
 
 ## Taula de contribucions
