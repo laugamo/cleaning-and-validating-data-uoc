@@ -11,4 +11,6 @@ Laura Gassó
 
 Aquest fitxer RMarkdown crea l'informe detallant les tasques d'exportació, neteja i anàlisi de les dades, aplicació de proves estadístiques i aplicació del model.
 
+- carpeta data
 
+Conté els fitxers amb les dades originals i finals analitzades.
